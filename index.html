@@ -60,10 +60,47 @@
         .gallery img {
             animation: fadeIn 0.5s ease;
         }
-        @media screen and (max-width: 600px) {
-            .gallery {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
+        .comment-section {
+            margin-top: 20px;
+        }
+        .comment {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-radius: 8px;
+        }
+        .comment textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .comment button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .share-buttons button {
+            margin-right: 10px;
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .download-options button {
+            margin-right: 10px;
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -81,9 +118,23 @@
             <img src="photo3.jpg" alt="City skyline at night" onclick="showFullImage('full_photo3.jpg')">
             <!-- 添加更多照片 -->
         </div>
+        <div class="comment-section">
+            <h2>Comments</h2>
+            <div class="comment">
+                <textarea placeholder="Leave a comment"></textarea>
+                <button onclick="postComment()">Post Comment</button>
+            </div>
+            <!-- Display comments here -->
+        </div>
         <div class="share-buttons">
             <button onclick="shareToFacebook()">Share to Facebook</button>
             <button onclick="shareToTwitter()">Share to Twitter</button>
+        </div>
+        <div class="download-options">
+            <button onclick="downloadPhoto('photo1.jpg')">Download Photo 1</button>
+            <button onclick="downloadPhoto('photo2.jpg')">Download Photo 2</button>
+            <button onclick="downloadPhoto('photo3.jpg')">Download Photo 3</button>
+            <!-- Add more download options if needed -->
         </div>
     </div>
 
@@ -115,6 +166,17 @@
             }
         }
 
+        function postComment() {
+            var textarea = document.querySelector('.comment textarea');
+            var commentText = textarea.value;
+            if (commentText.trim() !== '') {
+                var commentDiv = document.createElement('div');
+                commentDiv.textContent = commentText;
+                document.querySelector('.comment-section').appendChild(commentDiv);
+                textarea.value = '';
+            }
+        }
+
         function shareToFacebook() {
             // Add Facebook sharing logic here
             alert('Shared to Facebook');
@@ -123,6 +185,11 @@
         function shareToTwitter() {
             // Add Twitter sharing logic here
             alert('Shared to Twitter');
+        }
+
+        function downloadPhoto(photoUrl) {
+            // Add download logic here
+            alert('Downloading ' + photoUrl);
         }
     </script>
 </body>
