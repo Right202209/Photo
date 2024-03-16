@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +15,7 @@
             color: #333;
             transition: background-color 0.3s ease;
         }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -23,16 +25,19 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.3s ease;
         }
+
         h1 {
             text-align: center;
             margin-bottom: 30px;
             color: #007bff;
         }
+
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             grid-gap: 20px;
         }
+
         .gallery img {
             width: 100%;
             height: auto;
@@ -40,9 +45,11 @@
             transition: transform 0.3s ease;
             cursor: pointer;
         }
+
         .gallery img:hover {
             transform: scale(1.05);
         }
+
         .gallery img.clicked {
             transform: scale(1.5);
             z-index: 999;
@@ -53,22 +60,32 @@
             max-width: 80%;
             max-height: 80%;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         .gallery img {
             animation: fadeIn 0.5s ease;
         }
+
         .comment-section {
             margin-top: 20px;
         }
+
         .comment {
             margin-bottom: 10px;
             padding: 10px;
             background-color: #f2f2f2;
             border-radius: 8px;
         }
+
         .comment textarea {
             width: 100%;
             height: 100px;
@@ -76,6 +93,7 @@
             padding: 10px;
             border-radius: 8px;
         }
+
         .comment button {
             padding: 8px 20px;
             background-color: #007bff;
@@ -84,6 +102,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .share-buttons button {
             margin-right: 10px;
             padding: 8px 20px;
@@ -93,6 +112,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .download-options button {
             margin-right: 10px;
             padding: 8px 20px;
@@ -104,6 +124,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>My Photo Gallery</h1>
@@ -113,10 +134,39 @@
         </div>
         <div class="gallery">
             <!-- 在这里添加你的照片 -->
-            <img src="photo1.jpg" alt="Sunset at the beach" onclick="showFullImage('full_photo1.jpg')">
+            <!--<img src="photo1.jpg" alt="Sunset at the beach" onclick="showFullImage('full_photo1.jpg')">
             <img src="photo2.jpg" alt="Mountain landscape" onclick="showFullImage('full_photo2.jpg')">
-            <!-- <img src="photo3.jpg" alt="City skyline at night" onclick="showFullImage('full_photo3.jpg')"> -->
-            <img src="https://picsum.photos/200/300" alt="City skyline at night">
+             <img src="photo3.jpg" alt="City skyline at night" onclick="showFullImage('full_photo3.jpg')"> -->
+            <img src="https://picsum.photos/200/300?1" alt="">
+            <img src="https://picsum.photos/200/300?2" alt="">
+            <img src="https://picsum.photos/200/300?3" alt="">
+            <img src="https://picsum.photos/200/300?4" alt="">
+            <img src="https://picsum.photos/200/300?5" alt="">
+            <img src="https://picsum.photos/200/300?6" alt="">
+            <img src="https://picsum.photos/200/300?7" alt="">
+            <img src="https://picsum.photos/200/300?8" alt="">
+            <img src="https://picsum.photos/200/300?9" alt="">
+            <img src="https://picsum.photos/200/300?10" alt="">
+            <img src="https://picsum.photos/200/300?11" alt="">
+            <img src="https://picsum.photos/200/300?12" alt="">
+            <img src="https://picsum.photos/200/300?13" alt="">
+            <img src="https://picsum.photos/200/300?14" alt="">
+            <img src="https://picsum.photos/200/300?15" alt="">
+            <img src="https://picsum.photos/200/300?16" alt="">
+            <img src="https://picsum.photos/200/300?17" alt="">
+            <img src="https://picsum.photos/200/300?18" alt="">
+            <img src="https://picsum.photos/200/300?19" alt="">
+            <img src="https://picsum.photos/200/300?20" alt="">
+            <img src="https://picsum.photos/200/300?21" alt="">
+            <img src="https://picsum.photos/200/300?22" alt="">
+            <img src="https://picsum.photos/200/300?23" alt="">
+            <img src="https://picsum.photos/200/300?24" alt="">
+            <img src="https://picsum.photos/200/300?25" alt="">
+            <img src="https://picsum.photos/200/300?26" alt="">
+            <img src="https://picsum.photos/200/300?27" alt="">
+            <img src="https://picsum.photos/200/300?28" alt="">
+            <img src="https://picsum.photos/200/300?29" alt="">
+            <img src="https://picsum.photos/200/300?30" alt="">
             <!-- 添加更多照片 -->
         </div>
         <div class="comment-section">
@@ -144,7 +194,7 @@
             var fullImage = document.createElement('img');
             fullImage.src = imageUrl;
             fullImage.className = 'clicked';
-            fullImage.onclick = function() {
+            fullImage.onclick = function () {
                 fullImage.parentNode.removeChild(fullImage);
             };
             document.body.appendChild(fullImage);
@@ -194,4 +244,5 @@
         }
     </script>
 </body>
+
 </html>
