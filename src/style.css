@@ -1,0 +1,118 @@
+:root {
+    --bg-color: #f7f7f7;
+    --text-color: #333;
+    --accent-color: #007bff;
+    --gap: 16px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+.gallery {
+    column-count: 1;
+    column-gap: var(--gap);
+    padding: 0 var(--gap);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+@media (min-width: 600px) {
+    .gallery {
+        column-count: 2;
+    }
+}
+
+@media (min-width: 900px) {
+    .gallery {
+        column-count: 3;
+    }
+}
+
+@media (min-width: 1200px) {
+    .gallery {
+        column-count: 4;
+    }
+}
+
+.gallery-item {
+    break-inside: avoid;
+    margin-bottom: var(--gap);
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+    cursor: zoom-in;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.gallery-item.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gallery-item:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    z-index: 1;
+}
+
+.gallery-link {
+    display: block;
+    position: relative;
+    text-decoration: none;
+}
+
+.placeholder {
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    transform: scale(1.1);
+    transition: opacity 0.5s ease;
+}
+
+.gallery-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.gallery-item.loaded img {
+    opacity: 1;
+}
+
+.gallery-item.loaded .placeholder {
+    opacity: 0;
+}
+
+/* PhotoSwipe customization */
+.pswp__bg {
+    background: rgba(0, 0, 0, 0.9);
+}
