@@ -1,77 +1,89 @@
 # Personal Photo Gallery
 
-A simple, elegant, and responsive personal photo gallery.
+中文文档: [README.zh-CN.md](README.zh-CN.md)
 
-## Features
+### Overview
 
-- **Automatic Image Optimization**: Resizes and compresses images for web display.
-- **Responsive Waterfall Layout**: Adapts to different screen sizes using CSS columns.
-- **Smooth Animations**: Fade-in effects and smooth transitions.
-- **Image Zoom**: Uses PhotoSwipe for a rich lightbox experience with zoom and touch gestures.
-- **Simple Management**: Just add images to `src/images` and rebuild.
+This project is a framework-free static photo gallery:
+- Put source images in `src/images/`
+- Build outputs to `public/`
+- Gallery metadata is generated into `public/data.json`
+- Optional private image hosting with Backblaze B2 + Cloudflare Worker proxy
 
-## Getting Started
+### Features
 
-1.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
+- Automatic image optimization (full image max width `1920`, thumbnail width `400`)
+- Responsive masonry-style layout
+- Lazy loading with blurred placeholders
+- PhotoSwipe lightbox with zoom and download
+- Watch mode for local development
 
-2.  **Add Images**:
-    Place your photos in `src/images`. Supported formats: JPG, PNG, WebP.
-
-3.  **Build the Gallery**:
-    ```bash
-    npm run build
-    ```
-    This will process images and generate the `public` folder.
-
-4.  **Development Mode**:
-    ```bash
-    npm run dev
-    ```
-    This will start a local server and watch for changes in `src`.
-
-## Deployment
-
-The `public` folder contains the static site. You can deploy it to GitHub Pages, Vercel, Netlify, or any static hosting service.
-
-## Backblaze B2（私有桶）+ Cloudflare Worker（中文配置）
-
-> 目标：页面与 `data.json` 仍部署到 GitHub Pages；原图与缩略图存放到 **B2 私有桶**；前端通过 **Cloudflare Worker 代理**读取图片。
-
-### 1) 创建 B2 私有桶
-
-1. 在 Backblaze B2 控制台创建 bucket。
-2. Bucket Type 选择 **Private**。
-3. 记录：
-   - `B2_BUCKET_ID`
-   - `B2_BUCKET_NAME`
-
-### 2) 创建最小权限 App Key
-
-建议创建仅用于本项目上传/读取的 Application Key，并限制到目标 bucket。
-
-建议权限：
-- 允许写入文件（上传构建产物）
-- 允许读取文件（Worker 回源）
-
-准备以下凭据：
-- `B2_KEY_ID`
-- `B2_APPLICATION_KEY`
-
-### 3) 本地构建与上传
-
-先安装依赖并构建：
+### Quick Start (Local Mode)
 
 ```bash
 npm install
+npm run build
+npm run start
+```
+
+Development watch mode:
+
+```bash
+npm run dev
+```
+
+### Scripts
+
+- `npm run build`: optimize images and generate `public/data.json`
+- `npm run dev`: watch `src/` and serve `public/`
+- `npm run add -- /path/a.jpg /path/b.png`: copy files to `src/images/`
+- `npm run upload:b2`: upload `public/images` and `public/thumbnails` to B2
+
+### Storage Modes
+
+Build output (`public/data.json`) includes:
+
+- `local` (default): load images from local static paths
+- `b2-private-proxy`: load images via `GALLERY_IMAGE_BASE_URL/<objectKey>`
+
+Build-time environment variables:
+
+- `GALLERY_STORAGE_MODE`: `local` or `b2-private-proxy`
+- `GALLERY_IMAGE_BASE_URL`: Worker base URL
+
+### Detailed Guide: Backblaze B2 Private Bucket + Cloudflare Worker
+
+#### 1. Create a private B2 bucket
+
+Create a bucket in Backblaze B2 and set Bucket Type to `Private`.
+
+Keep both values:
+- `B2_BUCKET_NAME` (used by Worker)
+- `B2_BUCKET_ID` (used by upload script)
+
+#### 2. Create a least-privilege Application Key
+
+Create a dedicated key scoped to this bucket with:
+- Read permission (Worker fetch)
+- Write permission (upload pipeline)
+
+You need:
+- `B2_KEY_ID`
+- `B2_APPLICATION_KEY`
+
+#### 3. Build with proxy mode enabled
+
+```bash
 GALLERY_STORAGE_MODE=b2-private-proxy \
 GALLERY_IMAGE_BASE_URL=https://<your-worker-domain> \
 npm run build
 ```
 
-然后上传构建后的图片到私有桶：
+Verify `public/data.json`:
+- `storage` is `b2-private-proxy`
+- `imageBaseUrl` matches your Worker URL
+
+#### 4. Upload generated images to B2
 
 ```bash
 B2_KEY_ID=... \
@@ -80,76 +92,58 @@ B2_BUCKET_ID=... \
 npm run upload:b2
 ```
 
-说明：
-- 上传脚本会上传 `public/images/**` 与 `public/thumbnails/**`
-- 上传 key 分别是 `images/...` 与 `thumbnails/...`
-- 默认缓存头：`public,max-age=31536000,immutable`
-- 同 key 重传会覆盖，便于 CI 幂等执行
+Behavior:
+- Uploads from `public/images/**` and `public/thumbnails/**`
+- Uses keys under `images/...` and `thumbnails/...`
+- Default cache control: `public,max-age=31536000,immutable`
 
-### 4) 部署 Cloudflare Worker 代理
+Optional cache override:
 
-仓库内示例目录：`worker/`
+```bash
+B2_CACHE_CONTROL='public,max-age=86400' npm run upload:b2
+```
 
-1. 安装 Wrangler（如尚未安装）
-2. 修改 `worker/wrangler.toml`：
-   - `name`
-   - `B2_BUCKET_NAME`
-3. 注入 Worker secrets：
+#### 5. Configure and deploy Cloudflare Worker
+
+Edit `worker/wrangler.toml`:
+- Set `name`
+- Set `[vars].B2_BUCKET_NAME`
+
+Set Worker secrets from `worker/`:
 
 ```bash
 cd worker
-wrangler secret put B2_KEY_ID
-wrangler secret put B2_APPLICATION_KEY
+npx wrangler secret put B2_KEY_ID
+npx wrangler secret put B2_APPLICATION_KEY
+npx wrangler deploy
 ```
 
-4. 发布 Worker：
+Validate endpoints:
+- `https://<worker-domain>/images/<filename>.jpg`
+- `https://<worker-domain>/thumbnails/<filename>.jpg`
 
-```bash
-wrangler deploy
-```
+#### 6. Configure GitHub Actions secrets
 
-Worker 路由约定：
-- `https://<worker-domain>/images/<file>`
-- `https://<worker-domain>/thumbnails/<file>`
-
-前端会在 `storage=b2-private-proxy` 模式下，使用 `imageBaseUrl + originalKey/thumbKey` 拼接访问地址。
-
-### 5) GitHub Actions Secrets 配置
-
-在仓库 Settings → Secrets and variables → Actions 中添加：
-
+Add these repo secrets:
 - `B2_KEY_ID`
 - `B2_APPLICATION_KEY`
 - `B2_BUCKET_ID`
-- `GALLERY_IMAGE_BASE_URL`（例如 `https://<worker-domain>`）
+- `GALLERY_IMAGE_BASE_URL`
 
-当前工作流顺序：
-1. `npm run build`（带 `GALLERY_STORAGE_MODE=b2-private-proxy`）
-2. `npm run upload:b2`
-3. 部署 `public/` 到 GitHub Pages
+Current workflow (`.github/workflows/deploy.yml`) does:
+1. Build with `b2-private-proxy`
+2. Upload images to B2
+3. Remove `public/images` and `public/thumbnails`
+4. Deploy remaining `public/` to GitHub Pages
 
-### 6) 常见问题排查
+#### 7. Troubleshooting
 
-- **403 Forbidden（Worker）**
-  - 检查 Worker secrets 是否已正确设置
-  - 检查 App Key 是否有对应 bucket 的读取权限
-- **404 Not Found（Worker）**
-  - 检查 `data.json` 中的 `originalKey/thumbKey` 是否与 B2 实际对象路径一致
-  - 确认已先执行 `npm run build` 再执行 `npm run upload:b2`
-- **页面仍加载旧图**
-  - 可能是 CDN/浏览器缓存，尝试强制刷新
-  - 确认上传后对象 key 是否变化
-- **线上图片路径不走 Worker**
-  - 检查构建时是否设置 `GALLERY_STORAGE_MODE=b2-private-proxy`
-  - 检查 `GALLERY_IMAGE_BASE_URL` 是否为 Worker 域名
-
-## Customization
-
-- **Styles**: Edit `src/style.css` to change the look and feel.
-- **Logic**: Edit `src/app.js` for custom behavior.
-- **Build Config**: Edit `scripts/build.js` to change image sizes or quality.
+- `403` from Worker: wrong secrets, missing bucket read permission, or wrong `B2_BUCKET_NAME`
+- `404` from Worker: files not uploaded, wrong object keys, or invalid path prefix
+- Old images still shown: browser/CDN cache not refreshed
+- Site still loading local image paths: build was not run with `b2-private-proxy`
 
 ## Credits
 
-- [PhotoSwipe](https://photoswipe.com/) for the lightbox.
-- [Sharp](https://sharp.pixelplumbing.com/) for image processing.
+- [PhotoSwipe](https://photoswipe.com/)
+- [Sharp](https://sharp.pixelplumbing.com/)
