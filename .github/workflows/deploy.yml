@@ -42,7 +42,21 @@ jobs:
         run: npm install
 
       - name: Build
+        env:
+          GALLERY_STORAGE_MODE: b2-private-proxy
+          GALLERY_IMAGE_BASE_URL: ${{ secrets.GALLERY_IMAGE_BASE_URL }}
         run: npm run build
+
+      - name: Upload images to Backblaze B2
+        env:
+          B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+          B2_BUCKET_ID: ${{ secrets.B2_BUCKET_ID }}
+          B2_CACHE_CONTROL: public,max-age=31536000,immutable
+        run: npm run upload:b2
+
+      - name: Remove images from Pages artifact
+        run: rm -rf public/images public/thumbnails
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

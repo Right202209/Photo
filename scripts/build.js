@@ -11,6 +11,8 @@ const DATA_FILE = 'public/data.json';
 const THUMB_WIDTH = 400; // Thumbnail width
 const MAX_WIDTH = 1920; // Max width for full images
 const QUALITY = 80; // JPEG quality
+const STORAGE_MODE = process.env.GALLERY_STORAGE_MODE || 'local';
+const IMAGE_BASE_URL = (process.env.GALLERY_IMAGE_BASE_URL || '').replace(/\/+$/, '');
 
 async function processImages() {
     await fs.ensureDir(PUBLIC_DIR);
@@ -76,9 +78,14 @@ async function processImages() {
             width = MAX_WIDTH;
         }
 
+        const originalKey = `images/${filename}`;
+        const thumbKey = `thumbnails/${filename}`;
+
         imageData.push({
-            src: `images/${filename}`,
-            thumb: `thumbnails/${filename}`,
+            src: originalKey,
+            thumb: thumbKey,
+            originalKey,
+            thumbKey,
             placeholder: placeholder,
             color: color,
             width: width,
@@ -91,7 +98,13 @@ async function processImages() {
     // Sort by filename or date if needed (currently just file system order)
     imageData.reverse();
 
-    await fs.writeJson(DATA_FILE, imageData, { spaces: 2 });
+    const dataPayload = {
+        storage: STORAGE_MODE,
+        imageBaseUrl: IMAGE_BASE_URL,
+        images: imageData
+    };
+
+    await fs.writeJson(DATA_FILE, dataPayload, { spaces: 2 });
     console.log(`Data written to ${DATA_FILE}`);
 
     // Copy static assets

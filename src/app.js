@@ -6,35 +6,82 @@ const gallery = document.getElementById('gallery');
 // Fetch image data
 fetch('data.json')
     .then(response => response.json())
-    .then(data => {
-        renderGallery(data);
+    .then(rawData => {
+        const galleryData = normalizeGalleryData(rawData);
+        renderGallery(galleryData.images, galleryData);
         initPhotoSwipe();
     })
     .catch(error => console.error('Error loading gallery data:', error));
 
-function renderGallery(images) {
+function normalizeGalleryData(rawData) {
+    if (Array.isArray(rawData)) {
+        return {
+            storage: 'local',
+            imageBaseUrl: '',
+            images: rawData
+        };
+    }
+
+    return {
+        storage: rawData.storage || 'local',
+        imageBaseUrl: (rawData.imageBaseUrl || '').replace(/\/+$/, ''),
+        images: Array.isArray(rawData.images) ? rawData.images : []
+    };
+}
+
+function resolveImageUrl(image, variant, galleryData) {
+    const storageMode = galleryData.storage;
+    const baseUrl = galleryData.imageBaseUrl;
+
+    if (storageMode === 'b2-private-proxy' && baseUrl) {
+        const key = variant === 'thumb'
+            ? (image.thumbKey || image.thumb)
+            : (image.originalKey || image.src);
+
+        if (!key) {
+            return '';
+        }
+
+        return `${baseUrl}/${String(key).replace(/^\/+/, '')}`;
+    }
+
+    return variant === 'thumb' ? image.thumb : image.src;
+}
+
+function renderGallery(images, galleryData) {
     const fragment = document.createDocumentFragment();
 
-    images.forEach((image, index) => {
+    images.forEach((image) => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
         item.style.backgroundColor = image.color;
 
-        // We use a link for PhotoSwipe
-        item.innerHTML = `
-            <a href="${image.src}"
-               data-pswp-width="${image.width}"
-               data-pswp-height="${image.height}"
-               target="_blank"
-               class="gallery-link">
-                <div class="placeholder" style="background-image: url(${image.placeholder}); padding-bottom: ${(image.height / image.width) * 100}%"></div>
-                <img src="${image.thumb}"
-                     alt="${image.alt || ''}"
-                     loading="lazy"
-                     onload="this.parentElement.parentElement.classList.add('loaded')">
-            </a>
-        `;
+        const originalUrl = resolveImageUrl(image, 'original', galleryData);
+        const thumbUrl = resolveImageUrl(image, 'thumb', galleryData);
 
+        const link = document.createElement('a');
+        link.href = originalUrl;
+        link.dataset.pswpWidth = String(image.width);
+        link.dataset.pswpHeight = String(image.height);
+        link.target = '_blank';
+        link.className = 'gallery-link';
+
+        const placeholder = document.createElement('div');
+        placeholder.className = 'placeholder';
+        placeholder.style.backgroundImage = `url(${image.placeholder})`;
+        placeholder.style.paddingBottom = `${(image.height / image.width) * 100}%`;
+
+        const img = document.createElement('img');
+        img.src = thumbUrl;
+        img.alt = image.alt || '';
+        img.loading = 'lazy';
+        img.onload = () => {
+            item.classList.add('loaded');
+        };
+
+        link.appendChild(placeholder);
+        link.appendChild(img);
+        item.appendChild(link);
         fragment.appendChild(item);
     });
 

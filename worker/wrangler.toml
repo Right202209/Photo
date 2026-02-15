@@ -1,0 +1,10 @@
+name = "photo-b2-proxy"
+main = "src/index.js"
+compatibility_date = "2026-02-15"
+
+[vars]
+B2_BUCKET_NAME = "your-private-bucket-name"
+
+# 通过 `wrangler secret put` 注入：
+# B2_KEY_ID
+# B2_APPLICATION_KEY
