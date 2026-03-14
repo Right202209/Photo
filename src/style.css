@@ -8,17 +8,6 @@
     --gap: 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-color: #0f1115;
-        --text-color: #e6e6e6;
-        --accent-color: #4da3ff;
-        --surface-color: #1a1d23;
-        --shadow-color: rgba(0, 0, 0, 0.6);
-        --hover-shadow: rgba(0, 0, 0, 0.7);
-    }
-}
-
 :root[data-theme='dark'] {
     --bg-color: #0f1115;
     --text-color: #e6e6e6;
