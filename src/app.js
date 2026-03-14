@@ -3,6 +3,19 @@ import PhotoSwipe from 'https://unpkg.com/photoswipe@5.3.8/dist/photoswipe.esm.j
 
 const gallery = document.getElementById('gallery');
 
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+const applyTheme = isDarkMode => {
+    if (isDarkMode) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+};
+
+applyTheme(prefersDarkScheme.matches);
+prefersDarkScheme.addEventListener('change', event => applyTheme(event.matches));
+
 // Fetch image data
 fetch('data.json')
     .then(response => response.json())
