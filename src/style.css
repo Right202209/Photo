@@ -2,7 +2,30 @@
     --bg-color: #f7f7f7;
     --text-color: #333;
     --accent-color: #007bff;
+    --surface-color: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.05);
+    --hover-shadow: rgba(0, 0, 0, 0.12);
     --gap: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #0f1115;
+        --text-color: #e6e6e6;
+        --accent-color: #4da3ff;
+        --surface-color: #1a1d23;
+        --shadow-color: rgba(0, 0, 0, 0.6);
+        --hover-shadow: rgba(0, 0, 0, 0.7);
+    }
+}
+
+:root[data-theme='dark'] {
+    --bg-color: #0f1115;
+    --text-color: #e6e6e6;
+    --accent-color: #4da3ff;
+    --surface-color: #1a1d23;
+    --shadow-color: rgba(0, 0, 0, 0.6);
+    --hover-shadow: rgba(0, 0, 0, 0.7);
 }
 
 body {
@@ -17,8 +40,8 @@ body {
 header {
     text-align: center;
     padding: 40px 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: var(--surface-color);
+    box-shadow: 0 2px 4px var(--shadow-color);
     margin-bottom: 20px;
 }
 
@@ -73,7 +96,7 @@ h1 {
 
 .gallery-item:hover {
     transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    box-shadow: 0 20px 40px var(--hover-shadow);
     z-index: 1;
 }
 
