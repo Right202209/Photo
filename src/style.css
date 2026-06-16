@@ -128,3 +128,21 @@ h1 {
 .pswp__bg {
     background: rgba(0, 0, 0, 0.9);
 }
+
+/* Respect users who ask for less motion: reveal everything, no transforms. */
+@media (prefers-reduced-motion: reduce) {
+    .gallery-item,
+    .gallery-item img,
+    .placeholder {
+        transition: none;
+    }
+
+    .gallery-item {
+        opacity: 1;
+        transform: none;
+    }
+
+    .gallery-item:hover {
+        transform: none;
+    }
+}

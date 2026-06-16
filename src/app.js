@@ -16,12 +16,20 @@ const applyTheme = isDarkMode => {
 applyTheme(prefersDarkScheme.matches);
 prefersDarkScheme.addEventListener('change', event => applyTheme(event.matches));
 
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// Header entrance — fire as early as possible, independent of image data.
+if (window.gsap && !reducedMotion.matches) {
+    window.gsap.from('header h1', { autoAlpha: 0, y: -24, duration: 0.8, ease: 'power3.out' });
+}
+
 // Fetch image data
 fetch('data.json')
     .then(response => response.json())
     .then(data => {
         renderGallery(data);
         initPhotoSwipe();
+        initScrollReveal();
     })
     .catch(error => console.error('Error loading gallery data:', error));
 
@@ -52,6 +60,53 @@ function renderGallery(images) {
     });
 
     gallery.appendChild(fragment);
+}
+
+function initScrollReveal() {
+    const gsap = window.gsap;
+    const ScrollTrigger = window.ScrollTrigger;
+
+    // If GSAP failed to load, the items stay on their CSS path: they reveal
+    // via the `.loaded` class on image load. Nothing to do here.
+    if (!gsap || !ScrollTrigger) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+    // The mobile address bar showing/hiding shouldn't trigger costly re-measures.
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
+    const items = gsap.utils.toArray('.gallery-item');
+
+    // Honour reduced-motion: show everything, no movement.
+    if (reducedMotion.matches) {
+        gsap.set(items, { autoAlpha: 1, y: 0 });
+        return;
+    }
+
+    // GSAP now owns the item entrance. Inline styles set here take precedence
+    // over the stylesheet, so the CSS `.loaded` reveal stands down while present.
+    // autoAlpha (opacity + visibility) also keeps off-screen items out of hit-testing.
+    gsap.set(items, { autoAlpha: 0, y: 40 });
+
+    // One batched trigger for the whole grid instead of N triggers — far less
+    // work per scroll frame. `once` kills each trigger after it fires.
+    ScrollTrigger.batch(items, {
+        start: 'top 90%',
+        once: true,
+        onEnter: batch => gsap.to(batch, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            stagger: { each: 0.08, grid: 'auto', from: 'start' },
+            overwrite: true
+        })
+    });
+
+    // Recompute trigger positions once the CSS columns settle, and again after
+    // the window load so any late layout is accounted for. Aspect-ratio boxes
+    // already reserve height, so this won't cause layout shift.
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+    window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
 }
 
 function initPhotoSwipe() {
