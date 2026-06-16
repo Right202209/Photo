@@ -5,6 +5,8 @@
     --surface-color: #ffffff;
     --shadow-color: rgba(0, 0, 0, 0.05);
     --hover-shadow: rgba(0, 0, 0, 0.12);
+    --header-glow: rgba(0, 123, 255, 0.12);
+    --decor-color: rgba(0, 123, 255, 0.22);
     --gap: 16px;
 }
 
@@ -15,6 +17,8 @@
     --surface-color: #1a1d23;
     --shadow-color: rgba(0, 0, 0, 0.6);
     --hover-shadow: rgba(0, 0, 0, 0.7);
+    --header-glow: rgba(77, 163, 255, 0.14);
+    --decor-color: rgba(77, 163, 255, 0.20);
 }
 
 body {
@@ -26,18 +30,65 @@ body {
     line-height: 1.6;
 }
 
-header {
+.site-header {
+    position: relative;
     text-align: center;
-    padding: 40px 20px;
-    background-color: var(--surface-color);
-    box-shadow: 0 2px 4px var(--shadow-color);
-    margin-bottom: 20px;
+    padding: clamp(56px, 9vw, 104px) 20px clamp(36px, 6vw, 64px);
+    background:
+        radial-gradient(135% 130% at 50% -25%, var(--header-glow), transparent 62%),
+        var(--surface-color);
+    box-shadow: 0 1px 0 var(--shadow-color), 0 12px 30px -22px var(--hover-shadow);
+    margin-bottom: clamp(24px, 4vw, 44px);
+    overflow: hidden;
+}
+
+.site-header__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+}
+
+.site-header__eyebrow {
+    margin: 0 0 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    opacity: 0.9;
 }
 
 h1 {
     margin: 0;
-    font-weight: 300;
-    letter-spacing: 1px;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 7vw, 4.5rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    background: linear-gradient(120deg, var(--text-color) 35%, var(--accent-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.site-header__rule {
+    display: block;
+    width: 72px;
+    height: 3px;
+    margin: 22px auto 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+}
+
+.site-header__subtitle {
+    margin: 20px auto 0;
+    max-width: 48ch;
+    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-color);
+    opacity: 0.62;
 }
 
 .gallery {
@@ -142,6 +193,47 @@ h1 {
     z-index: 10;
     will-change: transform;
 }
+
+/* Ambient background orbs. Sit behind in-flow content (z-index -1, above the
+   page background) and are confined to the empty side gutters: each rail's
+   width is the gutter size, collapsing to 0 — and clipping its orbs away —
+   once the viewport is no wider than the gallery. */
+.bg-decor {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-decor__rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: max(0px, calc((100vw - 1600px) / 2));
+    overflow: hidden;
+}
+
+.bg-decor__rail--left { left: 0; }
+.bg-decor__rail--right { right: 0; }
+
+.bg-orb {
+    position: absolute;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, var(--decor-color), transparent 70%);
+    filter: blur(6px);
+    opacity: 0.8;
+    will-change: transform;
+}
+
+.bg-decor__rail--left .bg-orb:nth-child(1) { top: 8%;  left: 14%;  width: clamp(90px, 9vw, 150px); }
+.bg-decor__rail--left .bg-orb:nth-child(2) { top: 41%; left: -8%;  width: clamp(120px, 13vw, 230px); opacity: 0.55; }
+.bg-decor__rail--left .bg-orb:nth-child(3) { top: 73%; left: 22%;  width: clamp(60px, 6vw, 110px); }
+
+.bg-decor__rail--right .bg-orb:nth-child(1) { top: 13%; right: 18%; width: clamp(70px, 7vw, 130px); }
+.bg-decor__rail--right .bg-orb:nth-child(2) { top: 47%; right: -7%; width: clamp(130px, 14vw, 250px); opacity: 0.5; }
+.bg-decor__rail--right .bg-orb:nth-child(3) { top: 77%; right: 16%; width: clamp(80px, 8vw, 140px); }
 
 /* Respect users who ask for less motion: reveal everything, no transforms. */
 @media (prefers-reduced-motion: reduce) {

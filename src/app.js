@@ -20,7 +20,13 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 // Header entrance — fire as early as possible, independent of image data.
 if (window.gsap && !reducedMotion.matches) {
-    window.gsap.from('header h1', { autoAlpha: 0, y: -24, duration: 0.8, ease: 'power3.out' });
+    window.gsap.from('.site-header__inner > *', {
+        autoAlpha: 0,
+        y: -24,
+        duration: 0.8,
+        ease: 'power3.out',
+        stagger: 0.12
+    });
 }
 
 // Fetch image data
@@ -33,10 +39,22 @@ fetch('data.json')
     })
     .catch(error => console.error('Error loading gallery data:', error));
 
+// Fisher–Yates shuffle for a fresh random arrangement on every visit.
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 function renderGallery(images) {
     const fragment = document.createDocumentFragment();
 
-    images.forEach((image, index) => {
+    // Shuffle a copy so the source data.json order is left untouched.
+    const arrangement = shuffle(images.slice());
+
+    arrangement.forEach(image => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
         item.style.backgroundColor = image.color;
@@ -77,6 +95,7 @@ function initAnimations() {
     initScrollProgress(gsap);
     initGalleryReveal(gsap, ScrollTrigger);
     initHoverZoom(gsap);
+    initBackgroundDecor(gsap);
 }
 
 // Top-edge bar scrubbed to scroll position — one composited transform, no layout.
@@ -103,7 +122,13 @@ function initGalleryReveal(gsap, ScrollTrigger) {
     // GSAP now owns the item entrance. Inline styles set here take precedence
     // over the stylesheet, so the CSS `.loaded` reveal stands down while present.
     // autoAlpha (opacity + visibility) also keeps off-screen items out of hit-testing.
-    gsap.set(items, { autoAlpha: 0, y: 40 });
+    // Per-item random offset/tilt gives the reveal an organic, scattered feel that
+    // complements the randomized arrangement; each settles back to y:0, rotate:0.
+    gsap.set(items, {
+        autoAlpha: 0,
+        y: () => gsap.utils.random(30, 70),
+        rotate: () => gsap.utils.random(-2.5, 2.5)
+    });
 
     // One batched trigger for the whole grid instead of N triggers — far less
     // work per scroll frame. `once` kills each trigger after it fires.
@@ -113,6 +138,7 @@ function initGalleryReveal(gsap, ScrollTrigger) {
         onEnter: batch => gsap.to(batch, {
             autoAlpha: 1,
             y: 0,
+            rotate: 0,
             duration: 0.6,
             ease: 'power2.out',
             stagger: { each: 0.08, grid: 'auto', from: 'start' },
@@ -163,6 +189,40 @@ function initHoverZoom(gsap) {
         if (item === active) active = null;
         const img = item.querySelector('img');
         if (img) zoomFor(img)(1);
+    });
+}
+
+// Ambient orbs drifting in the empty side gutters. Continuous gentle motion
+// plus a scroll-linked parallax (deeper orbs travel further). Static and
+// harmless if GSAP is absent or the user prefers reduced motion.
+function initBackgroundDecor(gsap) {
+    const orbs = gsap.utils.toArray('.bg-orb');
+    if (!orbs.length || reducedMotion.matches) return;
+
+    // Soft fade-in that won't fight the drift tween (opacity only).
+    gsap.from(orbs, { autoAlpha: 0, duration: 1.4, ease: 'power1.out', stagger: 0.2 });
+
+    orbs.forEach((orb, i) => {
+        const depth = parseFloat(orb.dataset.depth) || 0.5;
+
+        // Endless, self-offset drift — xPercent/scale only, leaving the y axis
+        // free for the parallax tween below to own.
+        gsap.to(orb, {
+            xPercent: gsap.utils.random(-15, 15),
+            scale: gsap.utils.random(0.85, 1.18),
+            duration: gsap.utils.random(7, 12),
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            delay: i * 0.35
+        });
+
+        // Scroll-scrubbed vertical parallax; magnitude scales with depth.
+        gsap.to(orb, {
+            y: -depth * 240,
+            ease: 'none',
+            scrollTrigger: { start: 0, end: 'max', scrub: 0.6 }
+        });
     });
 }
 

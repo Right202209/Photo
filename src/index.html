@@ -13,8 +13,29 @@
 </head>
 <body>
     <div class="scroll-progress" aria-hidden="true"></div>
-    <header>
-        <h1>Gallery</h1>
+
+    <!-- Ambient GSAP-animated orbs, confined to the empty side gutters on wide
+         screens. The rails collapse to zero width below the gallery's max-width,
+         so this layer self-hides without a media query. -->
+    <div class="bg-decor" aria-hidden="true">
+        <div class="bg-decor__rail bg-decor__rail--left">
+            <span class="bg-orb" data-depth="0.35"></span>
+            <span class="bg-orb" data-depth="0.7"></span>
+            <span class="bg-orb" data-depth="0.5"></span>
+        </div>
+        <div class="bg-decor__rail bg-decor__rail--right">
+            <span class="bg-orb" data-depth="0.55"></span>
+            <span class="bg-orb" data-depth="0.3"></span>
+            <span class="bg-orb" data-depth="0.65"></span>
+        </div>
+    </div>
+    <header class="site-header">
+        <div class="site-header__inner">
+            <p class="site-header__eyebrow">Photography</p>
+            <h1>Gallery</h1>
+            <span class="site-header__rule" aria-hidden="true"></span>
+            <p class="site-header__subtitle">A curated collection of moments — light, color, and stillness.</p>
+        </div>
     </header>
 
     <main class="gallery" id="gallery">
