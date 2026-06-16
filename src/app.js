@@ -29,7 +29,7 @@ fetch('data.json')
     .then(data => {
         renderGallery(data);
         initPhotoSwipe();
-        initScrollReveal();
+        initAnimations();
     })
     .catch(error => console.error('Error loading gallery data:', error));
 
@@ -62,18 +62,36 @@ function renderGallery(images) {
     gallery.appendChild(fragment);
 }
 
-function initScrollReveal() {
+function initAnimations() {
     const gsap = window.gsap;
     const ScrollTrigger = window.ScrollTrigger;
 
-    // If GSAP failed to load, the items stay on their CSS path: they reveal
-    // via the `.loaded` class on image load. Nothing to do here.
+    // If GSAP failed to load, items stay on their CSS path: they reveal via the
+    // `.loaded` class on image load. Nothing else here runs.
     if (!gsap || !ScrollTrigger) return;
 
     gsap.registerPlugin(ScrollTrigger);
     // The mobile address bar showing/hiding shouldn't trigger costly re-measures.
     ScrollTrigger.config({ ignoreMobileResize: true });
 
+    initScrollProgress(gsap);
+    initGalleryReveal(gsap, ScrollTrigger);
+    initHoverZoom(gsap);
+}
+
+// Top-edge bar scrubbed to scroll position — one composited transform, no layout.
+function initScrollProgress(gsap) {
+    const bar = document.querySelector('.scroll-progress');
+    if (!bar) return;
+
+    gsap.to(bar, {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: { start: 0, end: 'max', scrub: 0.3 }
+    });
+}
+
+function initGalleryReveal(gsap, ScrollTrigger) {
     const items = gsap.utils.toArray('.gallery-item');
 
     // Honour reduced-motion: show everything, no movement.
@@ -107,6 +125,45 @@ function initScrollReveal() {
     // already reserve height, so this won't cause layout shift.
     requestAnimationFrame(() => ScrollTrigger.refresh());
     window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
+}
+
+// Subtle zoom of the image inside its clipped tile on hover. Pointer devices
+// only (no sticky zoom on touch) and disabled under reduced-motion.
+function initHoverZoom(gsap) {
+    if (reducedMotion.matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    // quickTo gives an interruptible, reusable tween per image; built lazily.
+    const zoomers = new WeakMap();
+    const zoomFor = img => {
+        let setter = zoomers.get(img);
+        if (!setter) {
+            setter = gsap.quickTo(img, 'scale', { duration: 0.5, ease: 'power3.out' });
+            zoomers.set(img, setter);
+        }
+        return setter;
+    };
+
+    let active = null;
+
+    // Delegated to the gallery container — two listeners total, not two per tile.
+    gallery.addEventListener('pointerover', event => {
+        const item = event.target.closest('.gallery-item');
+        if (!item || item === active) return;
+        active = item;
+        const img = item.querySelector('img');
+        if (img) zoomFor(img)(1.08);
+    });
+
+    gallery.addEventListener('pointerout', event => {
+        const item = event.target.closest('.gallery-item');
+        if (!item) return;
+        // Ignore moves that stay within the same tile.
+        if (event.relatedTarget && item.contains(event.relatedTarget)) return;
+        if (item === active) active = null;
+        const img = item.querySelector('img');
+        if (img) zoomFor(img)(1);
+    });
 }
 
 function initPhotoSwipe() {
