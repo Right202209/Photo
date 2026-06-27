@@ -3,28 +3,15 @@ import PhotoSwipe from 'https://unpkg.com/photoswipe@5.3.8/dist/photoswipe.esm.j
 
 const gallery = document.getElementById('gallery');
 
-const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-
-const applyTheme = isDarkMode => {
-    if (isDarkMode) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        document.documentElement.removeAttribute('data-theme');
-    }
-};
-
-applyTheme(prefersDarkScheme.matches);
-prefersDarkScheme.addEventListener('change', event => applyTheme(event.matches));
-
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-// Header entrance — fire as early as possible, independent of image data.
+// Header entrance follows the source site's slow fade-up rhythm.
 if (window.gsap && !reducedMotion.matches) {
     window.gsap.from('.site-header__inner > *', {
         autoAlpha: 0,
-        y: -24,
-        duration: 0.8,
-        ease: 'power3.out',
+        y: 120,
+        duration: 1,
+        ease: 'power2.out',
         stagger: 0.12
     });
 }
@@ -95,7 +82,6 @@ function initAnimations() {
     initScrollProgress(gsap);
     initGalleryReveal(gsap, ScrollTrigger);
     initHoverZoom(gsap);
-    initBackgroundDecor(gsap);
 }
 
 // Top-edge bar scrubbed to scroll position — one composited transform, no layout.
@@ -189,40 +175,6 @@ function initHoverZoom(gsap) {
         if (item === active) active = null;
         const img = item.querySelector('img');
         if (img) zoomFor(img)(1);
-    });
-}
-
-// Ambient orbs drifting in the empty side gutters. Continuous gentle motion
-// plus a scroll-linked parallax (deeper orbs travel further). Static and
-// harmless if GSAP is absent or the user prefers reduced motion.
-function initBackgroundDecor(gsap) {
-    const orbs = gsap.utils.toArray('.bg-orb');
-    if (!orbs.length || reducedMotion.matches) return;
-
-    // Soft fade-in that won't fight the drift tween (opacity only).
-    gsap.from(orbs, { autoAlpha: 0, duration: 1.4, ease: 'power1.out', stagger: 0.2 });
-
-    orbs.forEach((orb, i) => {
-        const depth = parseFloat(orb.dataset.depth) || 0.5;
-
-        // Endless, self-offset drift — xPercent/scale only, leaving the y axis
-        // free for the parallax tween below to own.
-        gsap.to(orb, {
-            xPercent: gsap.utils.random(-15, 15),
-            scale: gsap.utils.random(0.85, 1.18),
-            duration: gsap.utils.random(7, 12),
-            ease: 'sine.inOut',
-            repeat: -1,
-            yoyo: true,
-            delay: i * 0.35
-        });
-
-        // Scroll-scrubbed vertical parallax; magnitude scales with depth.
-        gsap.to(orb, {
-            y: -depth * 240,
-            ease: 'none',
-            scrollTrigger: { start: 0, end: 'max', scrub: 0.6 }
-        });
     });
 }
 

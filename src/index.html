@@ -3,43 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gallery</title>
+    <meta name="theme-color" content="#222325">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#222325">
+    <meta name="msapplication-navbutton-color" content="#222325">
+    <title>Photo</title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/5.3.8/photoswipe.min.css">
-    <!-- GSAP loaded deferred so it never blocks first paint; ScrollTrigger drives the scroll-reveal. -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
 <body>
     <div class="scroll-progress" aria-hidden="true"></div>
 
-    <!-- Ambient GSAP-animated orbs, confined to the empty side gutters on wide
-         screens. The rails collapse to zero width below the gallery's max-width,
-         so this layer self-hides without a media query. -->
-    <div class="bg-decor" aria-hidden="true">
-        <div class="bg-decor__rail bg-decor__rail--left">
-            <span class="bg-orb" data-depth="0.35"></span>
-            <span class="bg-orb" data-depth="0.7"></span>
-            <span class="bg-orb" data-depth="0.5"></span>
-        </div>
-        <div class="bg-decor__rail bg-decor__rail--right">
-            <span class="bg-orb" data-depth="0.55"></span>
-            <span class="bg-orb" data-depth="0.3"></span>
-            <span class="bg-orb" data-depth="0.65"></span>
-        </div>
-    </div>
     <header class="site-header">
         <div class="site-header__inner">
             <p class="site-header__eyebrow">Photography</p>
-            <h1>Gallery</h1>
+            <h1 class="content-title">Photo</h1>
             <span class="site-header__rule" aria-hidden="true"></span>
-            <p class="site-header__subtitle">A curated collection of moments — light, color, and stillness.</p>
+            <p class="site-header__subtitle">A curated collection of moments, light, color, and stillness.</p>
         </div>
+        <div class="arrow arrow-1" aria-hidden="true"></div>
+        <div class="arrow arrow-2" aria-hidden="true"></div>
     </header>
 
     <main class="gallery" id="gallery">
-        <!-- Images will be injected here -->
     </main>
 
     <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
